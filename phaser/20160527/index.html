@@ -1,0 +1,83 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>20160527</title>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no" />
+    <link rel="shortcut icon" href="../favicon.ico" />
+    <link type="text/css" href="../css/base.css" rel="stylesheet" />
+</head>
+<body>
+    <script src="../js/phaser.js"></script>
+    <script>
+        var platforms, player, cursors, stars, score = 0, scoreText;
+        var game = new Phaser.Game(window.screen.width, window.screen.height, Phaser.AUTO, "", { preload: preload, create: create, update: update });
+        function preload() {
+            game.load.image("bg", "images/bg.jpg");
+            game.load.image("ground", "images/ground.jpg");
+            game.load.image("dude", "images/dude.png");
+            game.load.image("dragon", "images/dragon.png");
+            game.load.image("star", "images/star.png");
+        }
+        function create() {
+            game.physics.startSystem(Phaser.Physics.ARCADE);
+            game.add.sprite(0, 0, "bg");
+            platforms = game.add.group();
+            platforms.enableBody = true;
+            var ground = platforms.create(0, game.world.height - 26, "ground");
+            ground.body.immovable = true;
+            var ledge = platforms.create(-150, game.world.height - 78, "ground");
+            ledge.body.immovable = true;
+            ledge = platforms.create(230, game.world.height - 134, "ground");
+            ledge.body.immovable = true;
+
+            player = game.add.sprite(32, game.world.height - 150, 'dragon');
+            game.physics.arcade.enable(player);
+            player.body.gravity.y = 300;
+            player.body.collideWorldBounds = true;
+            //player.animations.add("left", [0, 1, 2, 3], 10, true);
+            //player.animations.add("right", [5, 6, 7, 8], 10, true);
+
+            cursors = game.input.keyboard.createCursorKeys();
+
+            stars = game.add.group();
+            stars.enableBody = true;
+            for (var i = 0; i < 13; i++) {
+                var star = stars.create(i * 25, 0, "star");
+                star.body.gravity.y = 300;
+                star.body.bounce.y = 0.7 + Math.random() * 0.2;
+            }
+            scoreText = game.add.text(16, 16, "score: 0", { fontSize: "32px", fill: "#000" });
+        }
+        function update() {
+            game.physics.arcade.collide(player, platforms);
+            game.physics.arcade.collide(stars, platforms);
+            game.physics.arcade.overlap(player, stars, collectStar, null, this);
+
+
+            player.body.velocity.x = 0;
+            if (cursors.left.isDown) {
+                player.body.velocity.x = -80;
+                //player.animations.play('left');
+            }
+            else if (cursors.right.isDown) {
+                player.body.velocity.x = 80;
+                //player.animations.play('right');
+            }
+            else {
+                player.animations.stop();
+                //player.frame = 4;
+            }
+            if (cursors.up.isDown && player.body.touching.down) {
+                player.body.velocity.y = -200;
+            }
+        }
+        function collectStar(player, star) {
+            star.kill();
+            score += 10;
+            scoreText.text = 'Score: ' + score;
+        }
+    </script>
+</body>
+</html>
