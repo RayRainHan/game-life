@@ -1,0 +1,76 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+
+#viewport {
+    background-color: #000;
+}
+
+#bullet {
+    background-color: yellow;
+}
+
+#explosion {
+    background-color: none;
+    border: 3px dashed red;
+}
+
+#help {
+    background-color: #399;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    font: 16px 'Comic Sans MS',Verdana,Arial,sans-serif;
+    line-height: 28px;
+}
+
+    #help strong {
+        color: white;
+    }
+
+.target {
+    color: #ddd;
+    border: 0px solid red;
+    font: 24px 'Comic Sans MS',Verdana,Arial,sans-serif;
+    text-align: center;
+}
+
+#ship div {
+    position: absolute;
+}
+
+/*#shipNose {
+    background-color: #fff;
+    left: 10px;
+    width: 6px;
+    height: 30px;
+    z-index: 10;
+}
+
+
+#shipBody {
+    background-color: #666;
+    left: 7px;
+    top: 12px;
+    width: 12px;
+    height: 18px;
+    z-index: 20;
+}*/
+/* mine */
+#shipBody {
+    background-color: #999;
+    left: 7px;
+    top: 12px;
+    width: 12px;
+    height: 18px;
+    z-index: 20;
+}
+
+#shipWings {
+    background-color: #444;
+    top: 20px;
+    width: 26px;
+    height: 11px;
+    z-index: 30;
+}

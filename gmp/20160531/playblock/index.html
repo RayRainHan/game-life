@@ -1,0 +1,73 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>playblock</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+    <link href="css/base.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+    <script src="js/gmp-engine.1.7.4.js"></script>
+    <script type="text/javascript">
+        //public member
+        var _width = screen.width;
+        var _height = screen.height;
+        G.F.loadMain = function () {
+            this.AI = G.F.mainAI;
+            //set game status
+            G.KB.addKeys('A', 'D');
+            //log blocks num
+            //G.setState({ BlocksLength: 20 });
+            //create main viewport layer
+            G.makeGob('viewport', G).setVar({ x: 0, y: 0, w: _width, h: _height }).setStyle({}).turnOn();
+            //create my player
+            G.makeGob('blocks', G.O.viewport).setVar({ x: (_width / 2) - 90 / 2, y: _height - 25, w: 90, h: 20, AI: G.F.blocksAI }).setStyle({ backgroundColor: '#444', border: "1px solid red" }).turnOn();
+            //create moving blocks
+            G.makeGob('ball', G.O.viewport).setVar({ x: _width / 2 - 20 / 2, y: _height - 25 - G.O.blocks.h, w: 20, h: 20, S: 0, AI: G.F.ballAI }).setStyle({ backgroundColor: 'red', borderRadius: 30 }).turnOn();
+            //loop to create blocks
+            for (var i = 0; i < 10; i++) {
+                G.makeGob('blocks' + i, G.O.viewport).setVar({ x: (_width / 10) * i, y: 5, w: _width / 12, h: _width / 12, }).setStyle({ backgroundColor: '#000' }).turnOn();
+            }
+        };
+
+        G.F.mainAI = function () {
+            var target;
+            G.O.blocks.AI();
+            G.O.ball.AI();
+            for (var i = 0; i < 10; i++) {
+                target = G.O['blocks' + i];
+                if (G.O.ball.checkIntersection(target)) {
+                    target.turnOff();
+                    G.O.ball.setVar({ y: G.O.ball.y + 10 }).draw();
+                }
+                if (G.O.blocks.checkCollision(target))
+                    target.setVar({ y: t.y - 10 }).draw();
+            }
+        };
+
+        G.F.blocksAI = function () {
+            var t = this;
+            if (G.KB.keys.A.isPressed) {
+                if (t.x > 6)
+                    t.setVar({ x: t.x - 6 }).draw();
+                G.O.ball.S = 1;
+            }
+            else if (G.KB.keys.D.isPressed) {
+                if (t.x < (_width - t.w + 6))
+                    t.setVar({ x: t.x + 6 }).draw();
+                G.O.ball.S = 1;
+            }
+            return t;
+        };
+
+        G.F.ballAI = function () {
+            var t = this;
+            if (t.S) {
+                t.setVar({ y: t.y - 10 }).draw();
+            }
+        };
+
+        G.makeBlock('main', G.F.loadMain).loadBlock('main');
+    </script>
+</body>
+</html>
