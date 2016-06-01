@@ -1,0 +1,61 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+</head>
+<body>
+    <script src="js/jaws.js"></script>
+    <script type="text/javascript">
+        function initFunc() {
+            document.body.style.margin = 0;
+            var player;
+            var speed = 2;
+            this.setup = function () {
+                var anim = new jaws.Animation({ sprite_sheet: "images/droid_11x15.png", frame_durattion: 1000 });
+
+                player = new jaws.Sprite({ x: jaws.width / 2, y: jaws.height / 2, scale: 3, anchor: "bottom_center" });
+                player.anim_default = anim.slice(0, 5);
+                player.anim_up = anim.slice(6, 8);
+                player.anim_down = anim.slice(8, 10);
+                player.anim_left = anim.slice(10, 12);
+                player.anim_right = anim.slice(12, 14);
+
+                player.setImage(player.anim_default.next());
+                jaws.preventDefaultKeys(["up", "down", "left", "right", "space"]);
+            },
+            this.update = function () {
+                player.setImage(player.anim_default.next());
+                if (jaws.pressed("left")) {
+                    if (player.x > player.width / 2)
+                        player.x -= speed; player.setImage(player.anim_left.next());
+                }
+                if (jaws.pressed("right")) {
+                    if (player.x < jaws.canvas.width)
+                        player.x += speed; player.setImage(player.anim_right.next());
+                }
+                if (jaws.pressed("up")) {
+                    if (player.y > player.height)
+                        player.y -= speed; player.setImage(player.anim_up.next());
+                }
+                if (jaws.pressed("down")) {
+                    if (player.y < jaws.canvas.height)
+                        player.y += speed; player.setImage(player.anim_down.next());
+                }
+            },
+            this.draw = function () {
+                jaws.clear();
+                player.draw();
+            }
+        }
+
+        jaws.onload = function () {
+            jaws.assets.add("images/droid_11x15.png");
+            jaws.start(initFunc);
+        }
+
+
+    </script>
+</body>
+</html>

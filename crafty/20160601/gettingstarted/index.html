@@ -1,0 +1,34 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+</head>
+<body style="margin:0">
+    <div id="game"></div>
+    <script src="js/crafty.js"></script>
+    <script type="text/javascript">
+        Crafty.init(screen.width, screen.height, document.getElementById("game"));
+        Crafty.e('Floor,2D,Canvas,Color')
+            .attr({ x: 0, y: screen.height - 150, w: screen.width, h: 10 })
+            .color('gray');
+        var player = Crafty.e('2D,Canvas,Color,Twoway,Gravity')
+            .attr({ x: 0, y: 0, w: 100, h: 100 })
+            .color('#F00')
+            .twoway(200)
+            .gravity('Floor');
+        //double jump
+        player.hasDoubleJumpPowerUp = true;
+        player.bind('CheckJumping', function (ground) {
+            if (!ground && player.hasDoubleJumpPowerUp) {
+                player.canJump = true;
+                player.hasDoubleJumpPowerUp = false;
+            }
+        });
+        player.bind("LandedOnGround", function (ground) {
+            player.hasDoubleJumpPowerUp = true;
+        });
+    </script>
+</body>
+</html>
