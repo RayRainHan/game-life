@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Sample code</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+</head>
+<body>
+    <div id="container"></div>
+    <script src="../../collie.js"></script>
+    <script type="text/javascript">
+        //load an image
+        collie.ImageManager.add({
+            "logo": "logo.png"
+        });
+        //create a layer
+        var layer = new collie.Layer({
+            width: 320,
+            height: 480
+        });
+        //create  an object that will be displayed on the screen
+        var item = new collie.DisplayObject({
+            x: "center",
+            y: "center",
+            velocityRotate: 180,
+            backgroundImage: "logo"
+        }).addTo(layer);
+        //add a layer to renderer
+        collie.Renderer.addLayer(layer);
+        //retrieve renderer from the container ID element
+        collie.Renderer.load(document.getElementById("container"));
+        //start rendering
+        collie.Renderer.start();
+    </script>
+</body>
+</html>

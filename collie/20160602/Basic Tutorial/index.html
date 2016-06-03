@@ -1,0 +1,34 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Basic Tutorial</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+</head>
+<body>
+    <div id="container"></div>
+    <script src="../../collie.min.js"></script>
+    <script type="text/javascript">
+        //create a layer
+        var layer = new collie.Layer({
+            width: 320,
+            height: 480
+        });
+        //load image (when the image loaded,that function will do)
+        collie.ImageManager.add({
+            logo: "logo.png"
+        });
+        //create a displayObject for display logo
+        var logo = new collie.DisplayObject({
+            x: "center",
+            y: "center",
+            backgroundImage: "logo",
+            velocityRotate: 50
+        }).addTo(layer);
+        //rendering
+        collie.Renderer.addLayer(layer);
+        collie.Renderer.load(document.getElementById("container"));
+        collie.Renderer.start("30fps");//the fps defalut value is 60
+    </script>
+</body>
+</html>
