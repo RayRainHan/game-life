@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Match 3</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
+</head>
+<body>
+    <script src="js/phaser.js"></script>
+    <script type="text/javascript">
+        //website http://www.emanueleferonato.com/2016/05/17/match-3-bejeweled-html5-prototype-made-with-phaser/
+
+        var fieldSize = 7;
+        var orbColors = 6;
+        var orbSize = 100;
+        //
+        var swapSpeed = 200;
+        var fallSpeed = 1000;
+        var destroySpeed = 500;
+        var fastFall = true;
+        //
+        var gameArray = [];
+        var removeMap = [];
+        var orbGroup;
+        var selectedOrb;
+        var canPick = true;
+        //
+        window.onload = function () {
+            game = new Phaser.Game(700, 700);
+            game.state.add("PlayGame", playGame);
+            game.state.start("PlayGame");
+        }
+        //
+        var PlayGame = function (game) { }
+        PlayGame.prototype = {
+            preload: function () {
+                game.load.spritesheet("orbs", "images/orb.png", orbSize, orbSize);
+            },
+            create: function () {
+                drawField();
+                canPick = false;
+                game.input.onDown.add(orbSelect);
+                game.input.onUp.add(orbDeselect);
+            }
+        }
+        //
+        function drawField() {
+            orbGroup = game.add.group();
+            for (var i = 0; i < fieldSize; i++) {
+                gameArray[i] = [];
+                for (var j = 0; j < fieldSize; j++) {
+                    var orb = game.add.sprite(orbSize * j + orbSize / 2, orbSize * i + orbSize / 2, "orbs");
+                    orb.anchor.set(0.5);
+                    orbGroup.add(orb);
+                    do {
+                        var randomColor = game.rnd.between(0, orbColors - 1);
+                        orb.frame = randomColor;
+                        gameArray[i][j] = {
+                            orbColor: randomColor,
+                            orbSprite: orb
+                        }
+                    } while (isMatch(i, j));
+                }
+            }
+            selectedOrb = null;
+        }
+        //
+        function orbSelect(e) {
+            if (canPick) {
+                var row = Math.floor(e.clientY / orbSize);
+                var col = Math.floor(e.clientX / orbSize);
+                var pickedOrb = gemAt(row, col);
+                if (pickedOrb != -1) {
+                    if (selectedOrb == null) {
+                        pickedOrb.orbSprite.scale.setTo(1.2);
+                        pickedOrb.orbSprite.bringToTop();
+                        selectedOrb = pickedOrb;
+                        game.input.addMoveCallback(orbMove);
+                    }
+                    else {
+                        if (areTheSame(pickedOrb, selectedOrb)) {
+                            selectedOrb.orbSprite.scale.setTo(1);
+                            selectedOrb = null;
+                        } else {
+                            if (areNext(pickedOrb, selectedOrb)) {
+                                selectedOrb.orbSprite.scale.setTo(1);
+                                swapOrbs(selectedOrb, pickedOrb, true);
+                            }
+                            else {
+                                selectedOrb.orbSprite.scale.setTo(1);
+                                pickedOrb.orbSprite.scale.setTo(1.2);
+                                selectedOrb = pickedOrb;
+                                game.input.addMoveCallback(orbMove);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //
+        function orbDeSelect(e) {
+            game.input.addMoveCallback(orbMove);
+        }
+        //
+        function orbMove(event, pX, pY) {
+            if (event.id == 0) {
+                var distX = pX - selectedOrb.orbSprite.x;
+                var distY = pY - selectedOrb.orbSprite.Y;
+                var deltaRow = 0;
+                var deltaCol = 0;
+                if (Math.abs(distX) > orbSize / 2) {
+                    if (distX > 0)
+                        deltaCol = 1;
+                    else
+                        deltaCol = -1;
+                }
+                else {
+                    if (Math.abs(distY) > orbSize / 2) {
+                        if (distY > 0)
+                            deltaRow = 1;
+                        else
+                            deltaRow = -1;
+                    }
+                }
+                if (deltaRow + deltaCol != 0) {
+                    var pickedOrb = gemAt(getOrbRow(selectedOrb) + deltaRow, getOrbCol(selectedOrb) + deltaCol);
+                    if (pickedOrb != -1) {
+                        selectedOrb.orbSprite.scale.setTo(1);
+                        swapOrbs(selectedOrb, pickedOrb, true);
+                        game.input.addMoveCallback(orbMove);
+                    }
+                }
+            }
+        }
+        //
+        function swapOrbs(orb1, orb2, swapBack) {
+            canPick = false;
+            var fromColor = orb1.orbColor;
+            var fromSprite = orb1.orbSprite;
+            var toColor = orb2.orbColor;
+            var toSprite = orb2.orbSprite;
+            gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbColor = toColor;
+            gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite = toSprite;
+            gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbColor = fromColor;
+            gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbColor = fromSprite;
+            var orb1Tween = game.add.tween(gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite).to({
+                x: getOrbCol(orb1) * orbSize + orbSize / 2,
+                y: getOrbRow(orb1) * orbSize + orbSize / 2
+            });
+            var orb2Tween = game.add.tween(gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite).to({
+                x: getOrbCol(orb2) * orbSize + orbSize / 2,
+                y: getOrbRow(orb2) * orbSize + orbSize / 2
+            }, swapSpeed, Phaser.Easing.Linear.None, true);
+            orb2Tween.onComplete.add(function () {
+
+            });
+        }
+    </script>
+</body>
+</html>
