@@ -5,18 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=0" />
 </head>
-<body>
+<body style="margin:0">
     <script src="js/phaser.js"></script>
     <script type="text/javascript">
         //website http://www.emanueleferonato.com/2016/05/17/match-3-bejeweled-html5-prototype-made-with-phaser/
 
+        var game;
         var fieldSize = 7;
         var orbColors = 6;
         var orbSize = 100;
         //
         var swapSpeed = 200;
-        var fallSpeed = 1000;
-        var destroySpeed = 500;
+        var fallSpeed = 300;
+        var destroySpeed = 200;
         var fastFall = true;
         //
         var gameArray = [];
@@ -24,26 +25,26 @@
         var orbGroup;
         var selectedOrb;
         var canPick = true;
-        //
+
         window.onload = function () {
-            game = new Phaser.Game(700, 700);
-            game.state.add("PlayGame", playGame);
+            game = new Phaser.Game(screen.width, screen.height);
+            game.state.add("PlayGame", playGame)
             game.state.start("PlayGame");
         }
-        //
-        var PlayGame = function (game) { }
-        PlayGame.prototype = {
+
+        var playGame = function (game) { }
+        playGame.prototype = {
             preload: function () {
-                game.load.spritesheet("orbs", "images/orb.png", orbSize, orbSize);
+                game.load.spritesheet("orbs", "images/orbs.png", orbSize, orbSize);
             },
             create: function () {
                 drawField();
-                canPick = false;
+                canPick = true;
                 game.input.onDown.add(orbSelect);
                 game.input.onUp.add(orbDeselect);
             }
         }
-        //
+
         function drawField() {
             orbGroup = game.add.group();
             for (var i = 0; i < fieldSize; i++) {
@@ -64,12 +65,12 @@
             }
             selectedOrb = null;
         }
-        //
+
         function orbSelect(e) {
             if (canPick) {
                 var row = Math.floor(e.clientY / orbSize);
                 var col = Math.floor(e.clientX / orbSize);
-                var pickedOrb = gemAt(row, col);
+                var pickedOrb = gemAt(row, col)
                 if (pickedOrb != -1) {
                     if (selectedOrb == null) {
                         pickedOrb.orbSprite.scale.setTo(1.2);
@@ -81,7 +82,8 @@
                         if (areTheSame(pickedOrb, selectedOrb)) {
                             selectedOrb.orbSprite.scale.setTo(1);
                             selectedOrb = null;
-                        } else {
+                        }
+                        else {
                             if (areNext(pickedOrb, selectedOrb)) {
                                 selectedOrb.orbSprite.scale.setTo(1);
                                 swapOrbs(selectedOrb, pickedOrb, true);
@@ -97,15 +99,15 @@
                 }
             }
         }
-        //
-        function orbDeSelect(e) {
-            game.input.addMoveCallback(orbMove);
+
+        function orbDeselect(e) {
+            game.input.deleteMoveCallback(orbMove);
         }
-        //
+
         function orbMove(event, pX, pY) {
             if (event.id == 0) {
                 var distX = pX - selectedOrb.orbSprite.x;
-                var distY = pY - selectedOrb.orbSprite.Y;
+                var distY = pY - selectedOrb.orbSprite.y;
                 var deltaRow = 0;
                 var deltaCol = 0;
                 if (Math.abs(distX) > orbSize / 2) {
@@ -131,12 +133,12 @@
                     if (pickedOrb != -1) {
                         selectedOrb.orbSprite.scale.setTo(1);
                         swapOrbs(selectedOrb, pickedOrb, true);
-                        game.input.addMoveCallback(orbMove);
+                        game.input.deleteMoveCallback(orbMove);
                     }
                 }
             }
         }
-        //
+
         function swapOrbs(orb1, orb2, swapBack) {
             canPick = false;
             var fromColor = orb1.orbColor;
@@ -146,21 +148,21 @@
             gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbColor = toColor;
             gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite = toSprite;
             gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbColor = fromColor;
-            gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbColor = fromSprite;
+            gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbSprite = fromSprite;
             var orb1Tween = game.add.tween(gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite).to({
                 x: getOrbCol(orb1) * orbSize + orbSize / 2,
                 y: getOrbRow(orb1) * orbSize + orbSize / 2
-            });
-            var orb2Tween = game.add.tween(gameArray[getOrbRow(orb1)][getOrbCol(orb1)].orbSprite).to({
+            }, swapSpeed, Phaser.Easing.Linear.None, true);
+            var orb2Tween = game.add.tween(gameArray[getOrbRow(orb2)][getOrbCol(orb2)].orbSprite).to({
                 x: getOrbCol(orb2) * orbSize + orbSize / 2,
                 y: getOrbRow(orb2) * orbSize + orbSize / 2
             }, swapSpeed, Phaser.Easing.Linear.None, true);
             orb2Tween.onComplete.add(function () {
-                if (!matchInBorad() && swapBack) {
+                if (!matchInBoard() && swapBack) {
                     swapOrbs(orb1, orb2, false);
                 }
                 else {
-                    if (matchInBorad()) {
+                    if (matchInBoard()) {
                         handleMatches();
                     }
                     else {
@@ -170,43 +172,43 @@
                 }
             });
         }
-        //
+
         function areNext(orb1, orb2) {
             return Math.abs(getOrbRow(orb1) - getOrbRow(orb2)) + Math.abs(getOrbCol(orb1) - getOrbCol(orb2)) == 1;
         }
-        //
+
         function areTheSame(orb1, orb2) {
             return getOrbRow(orb1) == getOrbRow(orb2) && getOrbCol(orb1) == getOrbCol(orb2);
         }
-        //
+
         function gemAt(row, col) {
             if (row < 0 || row >= fieldSize || col < 0 || col >= fieldSize) {
                 return -1;
             }
             return gameArray[row][col];
         }
-        //
+
         function getOrbRow(orb) {
             return Math.floor(orb.orbSprite.y / orbSize);
         }
-        //
+
         function getOrbCol(orb) {
             return Math.floor(orb.orbSprite.x / orbSize);
         }
-        //
+
         function isHorizontalMatch(row, col) {
             return gemAt(row, col).orbColor == gemAt(row, col - 1).orbColor && gemAt(row, col).orbColor == gemAt(row, col - 2).orbColor;
         }
-        //
+
         function isVerticalMatch(row, col) {
             return gemAt(row, col).orbColor == gemAt(row - 1, col).orbColor && gemAt(row, col).orbColor == gemAt(row - 2, col).orbColor;
         }
-        //
+
         function isMatch(row, col) {
             return isHorizontalMatch(row, col) || isVerticalMatch(row, col);
         }
-        //
-        function matchInBorad() {
+
+        function matchInBoard() {
             for (var i = 0; i < fieldSize; i++) {
                 for (var j = 0; j < fieldSize; j++) {
                     if (isMatch(i, j)) {
@@ -216,7 +218,7 @@
             }
             return false;
         }
-        //
+
         function handleMatches() {
             removeMap = [];
             for (var i = 0; i < fieldSize; i++) {
@@ -229,7 +231,7 @@
             handleVerticalMatches();
             destroyOrbs();
         }
-        //
+
         function handleVerticalMatches() {
             for (var i = 0; i < fieldSize; i++) {
                 var colorStreak = 1;
@@ -253,7 +255,7 @@
                 }
             }
         }
-        //
+
         function handleHorizontalMatches() {
             for (var i = 0; i < fieldSize; i++) {
                 var colorStreak = 1;
@@ -267,7 +269,7 @@
                         if (colorStreak >= 3) {
                             console.log("HORIZONTAL :: Length = " + colorStreak + " :: Start = (" + i + "," + startStreak + ") :: Color = " + currentColor);
                             for (var k = 0; k < colorStreak; k++) {
-                                removeMap[i][colorStreak + k]++;
+                                removeMap[i][startStreak + k]++;
                             }
                         }
                         startStreak = j;
@@ -277,7 +279,7 @@
                 }
             }
         }
-        //
+
         function destroyOrbs() {
             var destroyed = 0;
             for (var i = 0; i < fieldSize; i++) {
@@ -291,7 +293,7 @@
                             orb.destroy();
                             destroyed--;
                             if (destroyed == 0) {
-                                makeOrbFall();
+                                makeOrbsFall();
                                 if (fastFall) {
                                     replenishField();
                                 }
@@ -302,11 +304,11 @@
                 }
             }
         }
-        //
-        function makeOrbFall() {
+
+        function makeOrbsFall() {
             var fallen = 0;
             var restart = false;
-            for (var i = 0; i < fieldSize - 2; i++) {
+            for (var i = fieldSize - 2; i >= 0; i--) {
                 for (var j = 0; j < fieldSize; j++) {
                     if (gameArray[i][j] != null) {
                         var fallTiles = holesBelow(i, j);
@@ -323,7 +325,7 @@
                                 fallen--;
                                 if (fallen == 0) {
                                     if (restart) {
-                                        makeOrbFall();
+                                        makeOrbsFall();
                                     }
                                     else {
                                         if (!fastFall) {
@@ -331,7 +333,7 @@
                                         }
                                     }
                                 }
-                            });
+                            })
                             gameArray[i + fallTiles][j] = {
                                 orbSprite: gameArray[i][j].orbSprite,
                                 orbColor: gameArray[i][j].orbColor
@@ -341,12 +343,11 @@
                     }
                 }
             }
-            if (fallen == 0)
-            {
+            if (fallen == 0) {
                 replenishField();
             }
         }
-        //
+
         function replenishField() {
             var replenished = 0;
             var restart = false;
@@ -375,7 +376,7 @@
                             replenished--;
                             if (replenished == 0) {
                                 if (restart) {
-                                    makeOrbFall();
+                                    makeOrbsFall();
                                 }
                                 else {
                                     if (matchInBoard()) {
@@ -392,6 +393,7 @@
                 }
             }
         }
+
         function holesBelow(row, col) {
             var result = 0;
             for (var i = row + 1; i < fieldSize; i++) {
